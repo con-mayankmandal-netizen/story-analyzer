@@ -13,7 +13,7 @@ _claude_client  = None
 _provider       = "gemini"
 
 
-def init_client(api_key: str, provider: str = "gemini"):
+def init_client(api_key, provider = "gemini"):
     """
     provider options:
       "gemini" — Google Gemini 1.5 Flash. FREE: 15 req/min, 1500/day forever.
@@ -49,7 +49,7 @@ def init_client(api_key: str, provider: str = "gemini"):
         raise ValueError(f"Unknown provider: {provider}. Use 'gemini', 'groq', or 'claude'.")
 
 
-def _call_ai(system_prompt: str, user_prompt: str) -> str:
+def _call_ai(system_prompt, user_prompt) : 
     if _provider == "gemini":
         full_prompt = f"{system_prompt}\n\n{user_prompt}"
         response = _gemini_client.generate_content(full_prompt)
@@ -80,7 +80,7 @@ def _call_ai(system_prompt: str, user_prompt: str) -> str:
     raise RuntimeError("No AI client initialized. Call init_client() first.")
 
 
-def _parse_json(raw: str) -> dict:
+def _parse_json(raw) : 
     raw = raw.strip()
     if raw.startswith("```"):
         raw = re.sub(r"^```[a-z]*\n?", "", raw)
@@ -132,7 +132,7 @@ Return ONLY valid JSON (no markdown, no extra text) with this structure:
 }"""
 
 
-def analyze_single(script_text: str, metrics_text: str, adset_code: str) -> dict:
+def analyze_single(script_text, metrics_text, adset_code) : 
     user_prompt = f"""ADSET CODE: {adset_code}
 
 SCRIPT TEXT:
@@ -145,11 +145,10 @@ Analyze this script's performance. Cite actual lines from the script when explai
     return _parse_json(_call_ai(SINGLE_SYSTEM, user_prompt))
 
 
-def compare_scripts(analyses: dict, metrics_map: dict) -> dict:
+def compare_scripts(analyses, metrics_map) : 
     payload = [
         {"adset_code": code, "analysis": analysis, "metrics": metrics_map.get(code, "")}
         for code, analysis in analyses.items()
     ]
     user_prompt = f"Compare these {len(payload)} scripts and identify what drove performance differences.\n\n{json.dumps(payload, indent=2)}"
     return _parse_json(_call_ai(COMPARE_SYSTEM, user_prompt))
-
