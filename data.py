@@ -68,13 +68,13 @@ MEAN_COLS   = [
 ]
 
 
-def _extract_adset_code(ad_name: str) -> str | None:
+def _extract_adset_code(ad_name: str) : 
     """Fallback: extract GAIxxx from Ad name if Adset Code column missing."""
     m = re.search(r"(GAI\d+)", str(ad_name))
     return m.group(1) if m else None
 
 
-def load_and_aggregate(uploaded_file) -> tuple[pd.DataFrame, list[str]]:
+def load_and_aggregate(uploaded_file) -> tuple:
     """
     Load master Excel, normalise columns, aggregate by adset_code.
     Returns (aggregated_df, warnings_list).
@@ -132,11 +132,11 @@ def load_and_aggregate(uploaded_file) -> tuple[pd.DataFrame, list[str]]:
     return aggregated, warnings
 
 
-def get_available_adset_codes(df: pd.DataFrame) -> list[str]:
+def get_available_adset_codes(df) -> list:
     return sorted(df["adset_code"].dropna().unique().tolist())
 
 
-def get_metrics_for_code(df: pd.DataFrame, code: str) -> dict:
+def get_metrics_for_code(df, code) : 
     """Return a clean metrics dict for one adset code."""
     row = df[df["adset_code"] == code]
     if row.empty:
@@ -144,7 +144,7 @@ def get_metrics_for_code(df: pd.DataFrame, code: str) -> dict:
     return row.iloc[0].dropna().to_dict()
 
 
-def metrics_summary_text(metrics: dict) -> str:
+def metrics_summary_text(metrics) : 
     """Format metrics as readable text for Claude prompt."""
     lines = []
     field_labels = {
