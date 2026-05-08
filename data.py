@@ -34,18 +34,15 @@ MEAN_COLS = [
     "completion_thruplays", "cpm_ctr_ratio",
 ]
 
-
 def _extract_adset_code(ad_name):
     m = re.search(r"(GAI\d+)", str(ad_name))
     return m.group(1) if m else None
-
 
 def load_and_aggregate(uploaded_file):
     warnings = []
     df = pd.read_excel(uploaded_file, engine="openpyxl")
     rename = {col: COLUMN_MAP[col] for col in df.columns if col in COLUMN_MAP}
     df = df.rename(columns=rename)
-
     if "adset_code" not in df.columns:
         if "adset_name" in df.columns:
             df["adset_code"] = df["adset_name"].apply(_extract_adset_code)
@@ -55,12 +52,9 @@ def load_and_aggregate(uploaded_file):
             warnings.append("Adset Code extracted from Ad name.")
         else:
             raise ValueError("Cannot find Adset Code column.")
-
     df["adset_code"] = df["adset_code"].astype(str).str.strip()
-
     if "cpm_ctr_ratio" not in df.columns and "cpm" in df.columns and "ctr" in df.columns:
         df["cpm_ctr_ratio"] = df["cpm"] / df["ctr"].replace(0, float("nan"))
-
     agg_dict = {}
     for col in SUM_COLS:
         if col in df.columns:
@@ -68,27 +62,17 @@ def load_and_aggregate(uploaded_file):
     for col in MEAN_COLS:
         if col in df.columns:
             agg_dict[col] = "mean"
-
-    meta_cols = ["writers", "publish_week", "daily_budget", "budget_cap",
-                 "geography", "unique_name", "asset_length", "adset_name",
-                 "meta_link", "campaign", "script_name"]
-    for col in meta_cols:
+    for col in ["writers","publish_week","daily_budget","budget_cap","geography",
+                "unique_name","asset_length","adset_name","meta_link","campaign","script_name"]:
         if col in df.columns:
             agg_dict[col] = "first"
-
     aggregated = df.groupby("adset_code", as_index=False).agg(agg_dict)
-
     if "spend_usd" in aggregated.columns and "results" in aggregated.columns:
-        aggregated["cost_per_result"] = (
-            aggregated["spend_usd"] / aggregated["results"].replace(0, float("nan"))
-        )
-
+        aggregated["cost_per_result"] = aggregated["spend_usd"] / aggregated["results"].replace(0, float("nan"))
     return aggregated, warnings
-
 
 def get_available_adset_codes(df):
     return sorted(df["adset_code"].dropna().unique().tolist())
-
 
 def get_metrics_for_code(df, code):
     row = df[df["adset_code"] == code]
@@ -96,10 +80,9 @@ def get_metrics_for_code(df, code):
         return {}
     return row.iloc[0].dropna().to_dict()
 
-
 def metrics_summary_text(metrics):
     lines = []
-    field_labels = {
+    labels = {
         "writers": "Writer(s)", "publish_week": "Publish Week",
         "geography": "Geography", "asset_length": "Asset Length",
         "spend_usd": "Total Spend (USD)", "results": "Total Installs",
@@ -114,7 +97,7 @@ def metrics_summary_text(metrics):
         "completion_thruplays": "0-95% Completion/ThruPlays",
         "daily_budget": "Daily Budget (USD)", "budget_cap": "Budget Cap (USD)",
     }
-    for key, label in field_labels.items():
+    for key, label in labels.items():
         val = metrics.get(key)
         if val is not None and str(val) not in ("nan", "None", ""):
             if isinstance(val, float):
