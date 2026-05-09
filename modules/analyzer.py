@@ -19,7 +19,13 @@ def init_client(api_key, provider = "gemini"):
     if provider == "gemini":
         import google.generativeai as genai
         genai.configure(api_key=api_key)
-        _gemini_client = genai.GenerativeModel(model_name="gemini-1.5-flash", generation_config={"temperature": 0.3, "response_mime_type": "application/json"})
+        _gemini_client = genai.GenerativeModel(
+            model_name="gemini-1.5-flash-latest",
+            generation_config={
+                "temperature": 0.3,
+                "response_mime_type": "application/json",
+            }
+        )
     elif provider == "groq":
         from groq import Groq
         _groq_client = Groq(api_key=api_key)
@@ -53,30 +59,10 @@ def _parse_json(raw):
 
 SINGLE_SYSTEM = """You are an expert video ad script analyst for audio drama/podcast apps.
 Return ONLY valid JSON with this structure:
-{
-  "overall_score": <0-100>,
-  "verdict": "",
-  "hook_score": <0-100>,
-  "hook_finding": "",
-  "hook_recommendation": "",
-  "pacing_score": <0-100>,
-  "pacing_finding": "",
-  "pacing_recommendation": "",
-  "emotional_arc_score": <0-100>,
-  "emotional_arc_finding": "",
-  "emotional_arc_recommendation": "",
-  "cta_score": <0-100>,
-  "cta_finding": "",
-  "cta_recommendation": "",
-  "retention_correlation": "",
-  "why_it_performed": "",
-  "top_3_improvements": [],
-  "writer_feedback": ""
-}"""
+{"overall_score":0,"verdict":"","hook_score":0,"hook_finding":"","hook_recommendation":"","pacing_score":0,"pacing_finding":"","pacing_recommendation":"","emotional_arc_score":0,"emotional_arc_finding":"","emotional_arc_recommendation":"","cta_score":0,"cta_finding":"","cta_recommendation":"","retention_correlation":"","why_it_performed":"","top_3_improvements":[],"writer_feedback":""}"""
 
 COMPARE_SYSTEM = """You are an expert video ad strategist for audio drama/podcast apps.
-Return ONLY valid JSON:
-{"winner": "", "winner_reason": "", "ranking": [], "pattern_insights": "", "hook_pattern": "", "writer_pattern": "", "what_to_replicate": [], "what_to_avoid": [], "next_test_recommendation": ""}"""
+Return ONLY valid JSON:{"winner":"","winner_reason":"","ranking":[],"pattern_insights":"","hook_pattern":"","writer_pattern":"","what_to_replicate":[],"what_to_avoid":[],"next_test_recommendation":""}"""
 
 
 def analyze_single(script_text, metrics_text, adset_code):
