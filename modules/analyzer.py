@@ -20,7 +20,7 @@ def init_client(api_key, provider = "gemini"):
         import google.generativeai as genai
         genai.configure(api_key=api_key)
         _gemini_client = genai.GenerativeModel(
-            model_name="gemini-1.5-flash-latest",
+            model_name="gemini-2.0-flash",
             generation_config={
                 "temperature": 0.3,
                 "response_mime_type": "application/json",
