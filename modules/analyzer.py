@@ -10,19 +10,40 @@ _provider       = "gemini"
 def init_client(api_key, provider="gemini"):
     global _gemini_client, _groq_client, _claude_client, _provider
     _provider = provider
+
     if provider == "gemini":
         import google.generativeai as genai
         genai.configure(api_key=api_key)
-        _gemini_client = genai.GenerativeModel(
+        model = genai.GenerativeModel(
             model_name="gemini-2.0-flash",
             generation_config={"temperature": 0.3, "response_mime_type": "application/json"}
         )
+        # Validate key with a tiny test call
+        model.generate_content("hi")
+        _gemini_client = model
+
     elif provider == "groq":
         from groq import Groq
-        _groq_client = Groq(api_key=api_key)
+        client = Groq(api_key=api_key)
+        # Validate key with a tiny test call
+        client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": "hi"}],
+            max_tokens=1
+        )
+        _groq_client = client
+
     elif provider == "claude":
         import anthropic
-        _claude_client = anthropic.Anthropic(api_key=api_key)
+        client = anthropic.Anthropic(api_key=api_key)
+        # Validate key with a tiny test call
+        client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1,
+            messages=[{"role": "user", "content": "hi"}]
+        )
+        _claude_client = client
+
     else:
         raise ValueError(f"Unknown provider: {provider}. Use 'gemini', 'groq', or 'claude'.")
 
