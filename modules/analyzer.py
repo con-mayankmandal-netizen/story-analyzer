@@ -32,14 +32,14 @@ def _call_ai(system_prompt, user_prompt):
         return _gemini_client.generate_content(f"{system_prompt}\n\n{user_prompt}").text
     elif _provider == "groq":
         response = _groq_client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            model="llama-3.3-70b-versatile",
             messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
-            temperature=0.3, max_tokens=1500)
+            temperature=0.3, max_tokens=2000)
         return response.choices[0].message.content
     elif _provider == "claude":
         import anthropic
         response = _claude_client.messages.create(
-            model="claude-haiku-4-5-20251001", max_tokens=1500, system=system_prompt,
+            model="claude-haiku-4-5-20251001", max_tokens=2000, system=system_prompt,
             messages=[{"role": "user", "content": user_prompt}])
         return response.content[0].text
     raise RuntimeError("No AI client initialized.")
@@ -63,7 +63,6 @@ Return ONLY valid JSON:
 
 
 def analyze_single(script_text, metrics_text, adset_code):
-    script_text = script_text[:8000]  # trim to stay within token limits
     prompt = f"ADSET CODE: {adset_code}\nSCRIPT:\n{script_text}\nPERFORMANCE:\n{metrics_text}"
     return _parse_json(_call_ai(SINGLE_SYSTEM, prompt))
 
